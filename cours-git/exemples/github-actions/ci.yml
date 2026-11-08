@@ -1,0 +1,53 @@
+# Emplacement réel : .github/workflows/ci.yml (à la racine du dépôt GitHub)
+# Hypothèse : le contenu de projet-demo/ est à la racine du dépôt.
+name: CI Python
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:          # bouton "Run workflow" dans l'onglet Actions
+
+permissions:
+  contents: read              # principe du moindre privilège
+
+concurrency:                  # annule un run en cours si un nouveau push arrive sur la même branche
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install ruff
+      - run: ruff check .
+
+  test:
+    needs: lint               # ne démarre que si "lint" a réussi
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+          cache-dependency-path: requirements-dev.txt
+      - name: Installer les dépendances
+        run: pip install -r requirements-dev.txt
+      - name: Lancer les tests
+        run: python -m pytest --cov=demo --cov-report=term --cov-report=xml
+      - name: Publier le rapport de couverture
+        if: matrix.python-version == '3.12'
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage.xml

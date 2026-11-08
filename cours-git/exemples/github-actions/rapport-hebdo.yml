@@ -1,0 +1,27 @@
+# Emplacement réel : .github/workflows/rapport-hebdo.yml
+# Exemple data : exécuter un script chaque lundi à 6h UTC avec un secret.
+name: Rapport hebdomadaire
+
+on:
+  schedule:
+    - cron: "0 6 * * 1"       # minute heure jour-du-mois mois jour-de-semaine (UTC)
+  workflow_dispatch:
+
+jobs:
+  rapport:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pandas
+      - name: Générer le rapport
+        env:
+          DB_URL: ${{ secrets.DB_URL }}   # défini dans Settings > Secrets and variables > Actions
+        run: python scripts/rapport.py --sortie rapport.csv
+      - uses: actions/upload-artifact@v4
+        with:
+          name: rapport-${{ github.run_number }}
+          path: rapport.csv
+          retention-days: 30

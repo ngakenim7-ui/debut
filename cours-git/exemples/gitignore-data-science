@@ -1,0 +1,36 @@
+# À renommer en .gitignore à la racine du projet
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+.coverage
+coverage.xml
+.ruff_cache/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Données et modèles (trop lourds / confidentiels -> DVC, Git LFS ou stockage cloud)
+data/raw/
+data/processed/
+*.parquet
+*.csv
+!data/sample/*.csv
+models/*.pkl
+models/*.joblib
+mlruns/
+
+# Secrets
+.env
+*.pem
+credentials*.json
+
+# Système / IDE
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
