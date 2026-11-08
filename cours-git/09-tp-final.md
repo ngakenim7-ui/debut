@@ -175,4 +175,72 @@ git reflog | head -5                     # l'historique de tous tes déplacement
 | écrire un `.gitlab-ci.yml` avec stages, rules, artifacts, job manuel | ☐ |
 | utiliser GitHub Desktop et GitKraken et dire quelle commande ils exécutent | ☐ |
 
+---
+
+## 📝 Exercices bonus
+
+À faire sur le dépôt du TP.
+
+### Exercice 9.1 — Seuil de couverture
+Fais **échouer la CI** (GitHub et GitLab) si la couverture des tests passe sous 90 %. Comment le vérifier en local ?
+
+### Exercice 9.2 — Nouvelle fonction en « TDD »
+Sur une branche `feature/etendue`, ajoute une fonction `etendue(valeurs)` (max − min, valeurs manquantes ignorées, `ValueError` si la liste est vide). **Écris d'abord le test**, constate qu'il échoue, puis implémente. Ouvre une PR (GitHub) **et** une MR (GitLab).
+
+### Exercice 9.3 — Trouver le commit fautif avec `git bisect`
+Un collègue a cassé `moyenne` quelque part dans les 20 derniers commits, et les tests échouent. Utilise `git bisect` pour trouver **automatiquement** le commit coupable.
+
+---
+
+## 🔑 Corrigés
+
+### Corrigé 9.1
+Ajouter l'option `--cov-fail-under=90` à pytest, dans `.github/workflows/ci.yml` **et** `.gitlab-ci.yml` :
+```bash
+python -m pytest --cov=demo --cov-report=term --cov-report=xml --cov-fail-under=90
+```
+pytest renvoie alors un code de sortie non nul si la couverture totale est < 90 %, ce qui fait échouer le job. Vérification locale : commenter temporairement un test, relancer la commande → message `FAIL Required test coverage of 90% not reached` et code de sortie ≠ 0 (`echo $?`).
+
+### Corrigé 9.2
+```bash
+git switch main && git pull
+git switch -c feature/etendue
+```
+Test d'abord (`tests/test_stats.py`, ajouter `etendue` à l'import) :
+```python
+def test_etendue():
+    assert etendue([3, None, 10, 1]) == 9
+
+
+def test_etendue_vide():
+    with pytest.raises(ValueError):
+        etendue([None])
+```
+`python -m pytest` → **échec** (`ImportError` : la fonction n'existe pas encore). Puis l'implémentation dans `src/demo/stats.py` :
+```python
+def etendue(valeurs: Iterable[float | None]) -> float:
+    """Écart entre la valeur maximale et minimale, valeurs manquantes ignorées."""
+    propres = nettoyer(valeurs)
+    if not propres:
+        raise ValueError("Impossible de calculer l'étendue d'une liste vide")
+    return max(propres) - min(propres)
+```
+```bash
+python -m pytest                      # tout passe
+git add -A && git commit -m "feat: ajoute l'étendue"
+git push -u origin feature/etendue    # puis "Compare & pull request" sur GitHub
+git push -u gitlab feature/etendue -o merge_request.create -o merge_request.target=main
+```
+
+### Corrigé 9.3
+```bash
+git bisect start
+git bisect bad                 # le commit actuel est cassé
+git bisect good HEAD~20        # celui-ci fonctionnait
+git bisect run python -m pytest -q   # Git teste automatiquement : code 0 = bon, sinon = mauvais
+# → "<hash> is the first bad commit"
+git bisect reset               # revenir là où tu étais
+```
+Git procède par **dichotomie** : pour 20 commits, environ 5 tests suffisent (log₂ 20 ≈ 4,3).
+
 ⬅️ Retour au [sommaire](README.md)

@@ -148,4 +148,78 @@ alias activate='source .venv/Scripts/activate'   # venv Python sous Windows/Git 
 | `Permission denied (publickey)` | Clé SSH non ajoutée à GitHub/GitLab ou à l'agent (voir 2.6) |
 | Bloqué dans un écran avec `:` ou `~` | Tu es dans `less` ou Vim : tape `q` (less) ou `Échap` puis `:q!` + Entrée (Vim) |
 
+---
+
+## 📝 Exercices
+
+### Exercice 2.1 — Chemins
+Tu veux aller dans le dossier Windows `C:\Users\Nim\Documents\Projet Data`. Quelle commande tapes-tu dans Git Bash ?
+
+### Exercice 2.2 — Inspecter un CSV sans Python
+Le fichier `ventes.csv` a une ligne d'en-tête. Écris les commandes qui :
+a) affichent l'en-tête seul ;
+b) comptent le nombre de **lignes de données** (sans l'en-tête) ;
+c) affichent les lignes contenant `Paris`.
+
+### Exercice 2.3 — Retrouver ses notebooks
+Liste tous les fichiers `.ipynb` du projet **sauf** les copies automatiques stockées dans les dossiers `.ipynb_checkpoints`.
+
+### Exercice 2.4 — Chasse aux TODO
+Affiche, avec numéros de ligne, toutes les occurrences de `TODO` dans les fichiers **`.py` uniquement** du dossier courant et de ses sous-dossiers.
+
+### Exercice 2.5 — Coincé dans Vim
+Tu as tapé `git commit` sans `-m` et un écran étrange (Vim) s'est ouvert.
+a) Comment écrire le message, enregistrer et quitter ?
+b) Comment quitter **sans** commiter ?
+c) Comment éviter que ça se reproduise ?
+
+### Exercice 2.6 — `Permission denied (publickey)`
+`git push` échoue avec `git@github.com: Permission denied (publickey).` Donne 4 vérifications à faire, dans l'ordre, avec les commandes.
+
+---
+
+## 🔑 Corrigés
+
+### Corrigé 2.1
+```bash
+cd "/c/Users/Nim/Documents/Projet Data"
+```
+Lettre de lecteur en minuscule précédée de `/`, des `/` comme séparateurs, et des **guillemets** à cause de l'espace (ou `Projet\ Data`).
+
+### Corrigé 2.2
+```bash
+head -n 1 ventes.csv                 # a) en-tête
+tail -n +2 ventes.csv | wc -l        # b) "tail -n +2" = à partir de la ligne 2
+grep "Paris" ventes.csv              # c) (grep -i pour ignorer la casse)
+```
+⚠️ `wc -l` compte les retours à la ligne : si la dernière ligne du fichier n'en a pas, elle n'est pas comptée. Sur un vrai projet, vérifie avec pandas (`len(df)`).
+
+### Corrigé 2.3
+```bash
+find . -name "*.ipynb" -not -path "*/.ipynb_checkpoints/*"
+```
+
+### Corrigé 2.4
+```bash
+grep -rn --include="*.py" "TODO" .
+```
+`-r` récursif, `-n` numéros de ligne, `--include` filtre les fichiers.
+
+### Corrigé 2.5
+a) Appuie sur `i` (mode insertion), écris le message, puis `Échap`, tape `:wq` et `Entrée`.
+b) `Échap`, puis `:q!` et `Entrée` : le message reste vide, Git affiche *Aborting commit due to empty commit message* et ne crée pas de commit.
+c) Changer d'éditeur : `git config --global core.editor "code --wait"` (VS Code) ou `"nano"` ; ou toujours utiliser `git commit -m "..."`.
+
+### Corrigé 2.6
+```bash
+ls ~/.ssh/                          # 1. une clé existe-t-elle ? (id_ed25519 et id_ed25519.pub)
+                                    #    sinon : ssh-keygen -t ed25519 -C "email"
+eval "$(ssh-agent -s)" && ssh-add -l   # 2. la clé est-elle chargée dans l'agent ?
+ssh-add ~/.ssh/id_ed25519              #    sinon, l'ajouter
+ssh -T git@github.com               # 3. GitHub reconnaît-il la clé ? Sinon, coller le contenu
+                                    #    de id_ed25519.pub dans Settings → SSH and GPG keys
+git remote -v                       # 4. l'URL du remote est-elle bien en SSH (git@github.com:...) ?
+                                    #    et le dépôt existe-t-il avec ce nom exact ?
+```
+
 ➡️ Suite : [Chapitre 3 — GitHub](03-github.md)

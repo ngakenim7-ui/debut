@@ -189,4 +189,76 @@ gh run watch                      # suivre un run en direct
 - Les notebooks `.ipynb` sont rendus directement dans GitHub.
 - **GitHub Pages** : Settings → Pages → publier depuis une branche ou via Actions → site sur `https://<pseudo>.github.io/<repo>/`.
 
+---
+
+## 📝 Exercices
+
+### Exercice 3.1 — Remettre le GitHub Flow dans l'ordre
+Remets ces étapes dans le bon ordre :
+(a) Merge dans `main` · (b) `git switch -c feature/x` · (c) Ouvrir la Pull Request · (d) `git pull` sur `main` · (e) Commits · (f) Revue + CI verte · (g) `git push -u origin feature/x` · (h) Supprimer la branche
+
+### Exercice 3.2 — Push refusé
+`git push` en HTTPS renvoie : *Support for password authentication was removed*. Que se passe-t-il, et quelles sont tes 3 options ? Donne la commande pour faire passer le remote `origin` en SSH.
+
+### Exercice 3.3 — Fermer deux issues automatiquement
+Ta PR corrige les issues #4 et #7. Que dois-tu écrire dans sa description pour que les **deux** se ferment au merge ?
+
+### Exercice 3.4 — Mettre à jour son fork
+Tu as forké `AUTEUR/projet` il y a un mois. Écris les commandes pour récupérer les nouveautés de l'original dans **ta** branche `main` locale **et** sur ton fork GitHub (le remote `upstream` n'est pas encore configuré).
+
+### Exercice 3.5 — Quel bouton de merge ?
+a) L'équipe veut **un seul commit par fonctionnalité** dans `main`.
+b) Tu veux conserver tous les commits et la trace visible de la branche.
+c) Tu veux un historique linéaire mais en gardant chaque commit.
+
+### Exercice 3.6 — CODEOWNERS
+Avec ce fichier, qui est demandé en relecture pour `sql/ventes.sql` ? Et pour `src/app.py` ?
+
+```
+*        @equipe-data
+/sql/    @bob
+```
+
+---
+
+## 🔑 Corrigés
+
+### Corrigé 3.1
+**d → b → e → g → c → f → a → h** : partir d'un `main` à jour, créer la branche, commiter, pousser, ouvrir la PR, relecture + CI, merger, supprimer la branche.
+
+### Corrigé 3.2
+GitHub n'accepte plus le **mot de passe du compte** pour Git en HTTPS. Options :
+1. **SSH** (recommandé) ;
+2. **HTTPS + Personal Access Token** (le token remplace le mot de passe ; Git Credential Manager le mémorise) ;
+3. **`gh auth login`** (GitHub CLI configure l'authentification).
+
+```bash
+git remote set-url origin git@github.com:TON_UTILISATEUR/projet.git
+git remote -v      # vérifier
+```
+
+### Corrigé 3.3
+```
+Closes #4
+Closes #7
+```
+Le mot-clé doit précéder **chaque** numéro : `Closes #4, #7` ne fermerait que la #4. (`Fixes`, `Resolves`… fonctionnent aussi.) La fermeture n'a lieu que si la PR est mergée dans la **branche par défaut**.
+
+### Corrigé 3.4
+```bash
+git remote add upstream https://github.com/AUTEUR/projet.git
+git fetch upstream
+git switch main
+git merge upstream/main      # fast-forward si tu n'as pas commité sur ton main
+git push origin main         # met à jour ton fork sur GitHub
+```
+(Raccourci web : bouton **Sync fork** sur la page de ton fork.)
+
+### Corrigé 3.5
+a) **Squash and merge** · b) **Create a merge commit** · c) **Rebase and merge**.
+
+### Corrigé 3.6
+- `sql/ventes.sql` → **@bob uniquement** : dans CODEOWNERS, c'est la **dernière règle qui correspond** qui l'emporte (pas un cumul).
+- `src/app.py` → **@equipe-data** (seule la règle `*` correspond).
+
 ➡️ Suite : [Chapitre 4 — GitHub Desktop](04-github-desktop.md)

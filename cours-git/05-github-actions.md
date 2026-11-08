@@ -233,4 +233,129 @@ Prérequis : **Settings → Pages → Source : GitHub Actions**.
 - **Re-run jobs → Enable debug logging** pour des logs détaillés.
 - Tester en local avec l'outil open source **`act`** (exécute les workflows dans Docker — pas parfaitement identique à GitHub).
 
+---
+
+## 📝 Exercices
+
+### Exercice 5.1 — Trouve les 4 erreurs
+Ce workflow ne fonctionne pas. Trouve les erreurs.
+
+```yaml
+name: CI
+on: push
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses actions/checkout@v4
+      - run: pip install ruff && ruff check .
+  test:
+    needs: build
+    steps:
+      - uses: actions/checkout@v4
+      - run: python -m pytest
+```
+
+### Exercice 5.2 — Déclencheur ciblé
+Écris le bloc `on:` d'un workflow qui se lance **uniquement** sur les Pull Requests vers `main` **qui modifient** des fichiers dans `src/` ou `tests/`, ainsi qu'en lancement manuel.
+
+### Exercice 5.3 — Cron
+Tu veux lancer un rapport **du lundi au vendredi à 7h30, heure de Paris**. Le cron de GitHub Actions est en UTC. Quelle expression écris-tu en hiver ? En été ? Quel problème cela pose-t-il ?
+
+### Exercice 5.4 — Combien de jobs ?
+Combien de jobs cette matrice génère-t-elle ? Lesquels ?
+
+```yaml
+strategy:
+  matrix:
+    os: [ubuntu-latest, windows-latest]
+    python-version: ["3.11", "3.12"]
+    exclude:
+      - os: windows-latest
+        python-version: "3.11"
+```
+
+### Exercice 5.5 — Déployer seulement depuis `main`
+Ajoute à un workflow existant (qui a un job `test`) un job `deploy` qui :
+- ne démarre **qu'après la réussite** de `test` ;
+- ne s'exécute **que** sur un `push` vers `main` (pas sur les PR) ;
+- utilise le secret `DEPLOY_TOKEN` dans une variable d'environnement.
+
+### Exercice 5.6 — Secrets et forks
+a) Pourquoi ne faut-il jamais écrire `run: echo ${{ secrets.API_KEY }}` pour « vérifier » un secret ?
+b) Un contributeur externe ouvre une PR depuis son fork : ton workflow échoue car `secrets.API_KEY` est vide. Bug ou comportement voulu ?
+
+---
+
+## 🔑 Corrigés
+
+### Corrigé 5.1
+1. `- uses actions/checkout@v4` → il manque les **deux-points** : `- uses: actions/checkout@v4`.
+2. `needs: build` → aucun job ne s'appelle `build` : `needs: lint`.
+3. Le job `test` n'a **pas de `runs-on:`** (obligatoire).
+4. `test` lance pytest **sans installer** Python ni les dépendances (pytest n'est pas garanti sur le runner) : ajouter `actions/setup-python` et `pip install -r requirements-dev.txt`.
+
+Version corrigée :
+```yaml
+name: CI
+on: push
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install ruff && ruff check .
+  test:
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements-dev.txt
+      - run: python -m pytest
+```
+💡 L'outil **`actionlint`** détecte automatiquement ce type d'erreurs avant le push.
+
+### Corrigé 5.2
+```yaml
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "src/**"
+      - "tests/**"
+  workflow_dispatch:
+```
+
+### Corrigé 5.3
+Paris = UTC+1 en hiver, UTC+2 en été (heure d'été).
+- Hiver : `cron: "30 6 * * 1-5"` (6h30 UTC = 7h30 Paris)
+- Été : `cron: "30 5 * * 1-5"` (5h30 UTC = 7h30 Paris)
+
+Problème : avec un cron fixe en UTC, l'heure locale **se décale d'une heure** deux fois par an. Solutions : accepter le décalage, ou mettre les deux crons et faire vérifier l'heure locale par le script (`TZ=Europe/Paris date +%H`). Rappel : le démarrage d'un workflow planifié peut aussi être retardé de plusieurs minutes.
+
+### Corrigé 5.4
+**3 jobs** : 2 OS × 2 versions = 4, moins la combinaison exclue (windows + 3.11) → `ubuntu/3.11`, `ubuntu/3.12`, `windows/3.12`.
+
+### Corrigé 5.5
+```yaml
+  deploy:
+    needs: test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Déployer
+        env:
+          DEPLOY_TOKEN: ${{ secrets.DEPLOY_TOKEN }}
+        run: ./scripts/deploy.sh
+```
+`github.ref` vaut `refs/heads/<branche>` pour un push (on peut aussi écrire `github.ref_name == 'main'`).
+
+### Corrigé 5.6
+a) GitHub masque les secrets connus (`***`) dans les logs, mais ce masquage n'est pas infaillible (valeur transformée, encodée, découpée…). Afficher un secret, c'est risquer de le divulguer dans des logs souvent lisibles par beaucoup de monde. Pour vérifier qu'il est défini : `if [ -z "$API_KEY" ]; then echo "absent"; exit 1; fi`.
+b) **Comportement voulu** : GitHub ne transmet pas les secrets aux workflows déclenchés par des PR venant de forks, sinon n'importe qui pourrait les voler en modifiant le workflow dans sa PR. Il faut que les jobs qui en ont besoin soient sautés dans ce cas, ou s'exécutent après le merge.
+
 ➡️ Suite : [Chapitre 6 — GitLab](06-gitlab.md)

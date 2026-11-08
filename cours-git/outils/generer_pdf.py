@@ -187,7 +187,7 @@ def construire_html() -> str:
   <p class="sous-titre">et leurs outils : Git Bash · GitHub Desktop · GitHub Actions ·
      GitLab CI/CD · GitKraken</p>
   <p class="public">Orienté data science, data analytics et développement —
-     explications, exemples testés et TP final</p>
+     explications, exemples testés, 54 exercices corrigés et TP final</p>
   <p class="date">Version du {date}</p>
 </section>"""
     toc = "\n".join(
@@ -244,6 +244,7 @@ hr { border: none; border-top: 1px solid var(--bord); margin: 14pt 0; }
 .couverture .sous-titre { font-size: 14pt; color: var(--accent); margin: 0 0 18pt; }
 .couverture .public { font-size: 11pt; color: var(--gris); }
 .couverture .date { margin-top: 40mm; color: var(--gris); }
+h2[id$="-corrigés"] { break-before: page; page-break-before: always; }
 .sommaire { break-before: page; page-break-before: always; }
 .sommaire ol { font-size: 12pt; line-height: 2.1; padding-left: 28pt; }
 .sommaire a { color: var(--encre); }

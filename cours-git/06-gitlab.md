@@ -168,4 +168,73 @@ glab ci view            # vue interactive du pipeline
 - **Model registry / Experiments** (MLflow-compatible) : selon la version et l'offre — à vérifier sur ton instance.
 - **Security scanning** (SAST, détection de secrets, dépendances) via des templates CI ; certaines fonctionnalités sont réservées à l'offre Ultimate.
 
+---
+
+## 📝 Exercices
+
+### Exercice 6.1 — Traduire GitHub → GitLab
+Donne l'équivalent GitLab de : Pull Request · Organization · Repository · GitHub Actions · `gh` · Workflow.
+
+### Exercice 6.2 — Références
+Dans un commentaire GitLab, que désignent : `#12`, `!34`, `~bug`, `%v1.0`, `@alice` ?
+
+### Exercice 6.3 — Quick actions
+Écris un commentaire qui, sur une issue : t'assigne l'issue, ajoute les labels `bug` et `urgent`, la rattache au milestone `v2.0` et estime le travail à 3 heures.
+
+### Exercice 6.4 — MR en une commande
+Tu es sur la branche `feature/export` (déjà commitée). Pousse-la en créant directement une Merge Request **brouillon** vers `develop`, avec le titre « Export Parquet » et suppression de la branche source après merge.
+
+### Exercice 6.5 — Le bon rôle
+Quel rôle minimal donner à chacun (Guest, Reporter, Developer, Maintainer, Owner) ?
+a) Une stagiaire qui doit lire le code et créer des issues, sans pousser de code.
+b) Un data scientist qui pousse sur des branches de fonctionnalité et ouvre des MR, sans pouvoir pousser sur `main` protégée.
+c) Le lead qui configure les branches protégées et les variables CI/CD.
+
+### Exercice 6.6 — Pousser vers GitHub ET GitLab d'un coup
+Configure le remote `origin` pour qu'un seul `git push` envoie sur GitHub **et** GitLab. Attention au piège !
+
+---
+
+## 🔑 Corrigés
+
+### Corrigé 6.1
+Merge Request · Group · Project · GitLab CI/CD · `glab` · Pipeline.
+
+### Corrigé 6.2
+`#12` issue n°12 · `!34` merge request n°34 · `~bug` label « bug » · `%v1.0` milestone « v1.0 » · `@alice` mention de l'utilisatrice alice (elle est notifiée).
+
+### Corrigé 6.3
+```
+/assign me
+/label ~bug ~urgent
+/milestone %v2.0
+/estimate 3h
+```
+
+### Corrigé 6.4
+```bash
+git push -u origin feature/export \
+  -o merge_request.create \
+  -o merge_request.target=develop \
+  -o merge_request.title="Draft: Export Parquet" \
+  -o merge_request.remove_source_branch
+```
+Le préfixe `Draft:` dans le titre marque la MR comme brouillon (elle ne peut pas être mergée tant qu'il n'est pas retiré).
+
+### Corrigé 6.5
+a) **Reporter** (lecture du code + issues ; un Guest ne voit pas le code d'un projet privé).
+b) **Developer** (push sur les branches non protégées, création de MR).
+c) **Maintainer** (paramètres du projet, branches protégées, variables CI/CD).
+
+### Corrigé 6.6
+```bash
+git remote set-url --add --push origin git@github.com:moi/projet.git
+git remote set-url --add --push origin git@gitlab.com:moi/projet.git
+git remote -v
+# origin  git@github.com:moi/projet.git (fetch)
+# origin  git@github.com:moi/projet.git (push)
+# origin  git@gitlab.com:moi/projet.git (push)
+```
+**Le piège** : dès qu'on ajoute une URL de push explicite, elle **remplace** l'URL par défaut. Si tu n'ajoutes que GitLab, `git push` n'irait plus que sur GitLab : il faut donc ajouter **les deux**. Le `fetch` continue de lire une seule source (ici GitHub).
+
 ➡️ Suite : [Chapitre 7 — GitLab CI/CD](07-gitlab-ci-cd.md)

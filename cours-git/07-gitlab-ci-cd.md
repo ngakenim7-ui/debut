@@ -303,4 +303,122 @@ entrainement-gpu:
 - Variable `CI_DEBUG_TRACE: "true"` = trace très détaillée — **peut exposer des secrets dans les logs**, à n'utiliser qu'avec prudence.
 - Erreur classique : `This job is stuck because you don't have any active runners` → aucun runner disponible pour ce projet ou ces `tags`.
 
+---
+
+## 📝 Exercices
+
+### Exercice 7.1 — Ordre d'exécution
+```yaml
+stages: [build, test, deploy]
+
+compiler:      { stage: build,  script: [echo build] }
+tests-unit:    { stage: test,   script: [echo unit] }
+tests-integ:   { stage: test,   script: [echo integ] }
+doc:           { stage: deploy, script: [echo doc], needs: [compiler] }
+publier:       { stage: deploy, script: [echo pub] }
+```
+a) Quels jobs tournent en parallèle ?
+b) Quand `doc` démarre-t-il ? Et `publier` ?
+c) Si `tests-integ` échoue, lesquels de `doc` et `publier` s'exécutent ?
+
+### Exercice 7.2 — Cache ou artifact ?
+Classe chaque élément : a) les paquets pip téléchargés · b) le modèle `model.joblib` entraîné · c) le rapport `coverage.xml` · d) le dossier `node_modules/` · e) le site HTML à publier sur GitLab Pages.
+
+### Exercice 7.3 — Règles
+Écris les `rules` d'un job `lint` qui doit tourner :
+- sur la **branche par défaut**, toujours ;
+- dans les pipelines de **merge request**, mais **seulement** si la MR modifie des fichiers `.py`, `.toml`, `.yml`/`.yaml` ou `.txt` (inutile de linter une MR qui ne touche que la documentation `.md`).
+
+### Exercice 7.4 — Job d'entraînement
+Écris un job `entrainer` (stage `train`, image `python:3.12-slim`) qui :
+- ne tourne que dans les pipelines **planifiés** ou lancés **manuellement depuis l'interface** (bouton *Run pipeline*) ;
+- exécute `pip install -r requirements.txt` puis `python train.py` ;
+- conserve le dossier `models/` pendant 30 jours.
+
+### Exercice 7.5 — Regex de couverture
+La sortie de pytest-cov se termine par `TOTAL      120     18    85%`. Quelle valeur de `coverage:` permet à GitLab d'afficher **85%** ?
+
+### Exercice 7.6 — `extends`
+```yaml
+.base:
+  image: python:3.12-slim
+  before_script:
+    - pip install -r requirements.txt
+  variables:
+    ENV: test
+
+tests:
+  extends: .base
+  before_script:
+    - pip install -r requirements-dev.txt
+  variables:
+    DEBUG: "1"
+  script:
+    - python -m pytest
+```
+a) Quelle(s) commande(s) `before_script` exécute le job `tests` ?
+b) Quelles variables a-t-il ?
+
+### Exercice 7.7 — Job bloqué
+Ton job affiche *This job is stuck because you don't have any active runners online or available with any of these tags assigned to them: gpu*. Explique et propose deux solutions.
+
+---
+
+## 🔑 Corrigés
+
+### Corrigé 7.1
+a) `tests-unit` et `tests-integ` (même stage `test`).
+b) `doc` démarre **dès que `compiler` est terminé** grâce à `needs` (en même temps que les tests). `publier` attend la fin de **tout** le stage `test`.
+c) `doc` s'exécute (il ne dépend que de `compiler`) ; `publier` **ne s'exécute pas** (un job du stage précédent a échoué).
+
+### Corrigé 7.2
+a) **cache** · b) **artifact** (un résultat à conserver) · c) **artifact** (rapport, `artifacts:reports`) · d) **cache** · e) **artifact** (dossier `public/` du job `pages`).
+Règle : *cache* = accélérer, peut disparaître ; *artifact* = résultat dont tu as besoin.
+
+### Corrigé 7.3
+```yaml
+lint:
+  script:
+    - ruff check .
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        - "**/*.{py,toml,yml,yaml,txt}"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+```
+Les règles sont évaluées **dans l'ordre**, la première qui correspond décide. Dans une MR, `changes` compare la branche à la branche cible : le job n'est ajouté que si au moins un fichier correspondant au motif a changé. Une MR ne touchant que des `.md` ne correspond à aucune règle → job absent. Sur la branche par défaut, la 2e règle (sans `changes`) l'ajoute toujours. Les accolades `{py,toml,...}` sont un motif glob accepté par `changes`.
+
+### Corrigé 7.4
+```yaml
+stages: [train]
+
+entrainer:
+  stage: train
+  image: python:3.12-slim
+  script:
+    - pip install -r requirements.txt
+    - python train.py
+  artifacts:
+    paths:
+      - models/
+    expire_in: 30 days
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+    - if: $CI_PIPELINE_SOURCE == "web"
+```
+
+### Corrigé 7.5
+```yaml
+coverage: '/TOTAL.*\s+(\d+%)$/'
+```
+`TOTAL` puis n'importe quoi, des espaces, et un **groupe capturé** `(\d+%)` en fin de ligne → `85%`. Les guillemets simples évitent que YAML interprète les `\`.
+
+### Corrigé 7.6
+a) **Seulement** `pip install -r requirements-dev.txt` : avec `extends`, les **listes sont remplacées**, pas concaténées (le `before_script` de `.base` est écrasé).
+b) `ENV=test` **et** `DEBUG=1` : les **dictionnaires** (comme `variables`) sont fusionnés.
+(Pour combiner des listes, utiliser `!reference [.base, before_script]`.)
+
+### Corrigé 7.7
+Le job a `tags: [gpu]` : seuls les runners portant le tag `gpu` peuvent le prendre, et **aucun n'est disponible** (pas enregistré, hors ligne, ou non autorisé pour ce projet). Solutions : enregistrer/redémarrer un runner avec le tag `gpu` (`gitlab-runner register ... --tag-list gpu`, ou dans l'interface du runner), ou retirer/changer le tag si le job n'a pas vraiment besoin d'un GPU.
+
 ➡️ Suite : [Chapitre 8 — GitKraken](08-gitkraken.md)

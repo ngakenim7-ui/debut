@@ -128,4 +128,82 @@ Les noms et le périmètre exact de ces fonctionnalités évoluent souvent : ré
 | Stash / Pop | `git stash` / `git stash pop` |
 | Fetch All | `git fetch --all` |
 
+---
+
+## 📝 Exercices
+
+### Exercice 8.1 — Actions ↔ commandes
+Donne la commande Git équivalente : a) double-clic sur la branche `dev` · b) *Stage hunk* · c) *Reset main to this commit → Mixed* · d) *Cherry pick commit* · e) *Pull (rebase)* · f) bouton *Stash*.
+
+### Exercice 8.2 — Nettoyer avant la PR
+Ta branche contient 4 commits : `wip`, `wip 2`, `feat: ajoute l'export CSV`, `typo`. Tu veux **un seul** commit propre nommé `feat: ajoute l'export CSV` avant d'ouvrir ta PR. Comment faire avec GitKraken ? Quelle est la commande équivalente ?
+
+### Exercice 8.3 — Soft, Mixed, Hard
+Après un *Reset to this commit* sur le commit précédent, où se trouvent les modifications du commit annulé avec chaque mode ?
+
+### Exercice 8.4 — Branche supprimée par erreur
+Tu as supprimé la branche locale `feature/api` (non fusionnée) dans GitKraken. Comment la récupérer, dans GitKraken puis en ligne de commande ?
+
+### Exercice 8.5 — Lire le graphe
+```
+● F  main
+│ ● E  feature
+│ ● D
+├─╯
+● C
+● B
+```
+a) Quels commits sont dans `main` mais pas dans `feature` ? Et l'inverse ?
+b) Quelles commandes les listent ?
+
+### Exercice 8.6 — Quel outil ?
+Pour chaque besoin, propose l'outil le plus adapté (CLI, GitHub Desktop, GitKraken) :
+a) débutant, projets uniquement sur GitHub, sous Windows ;
+b) projets sur GitLab d'entreprise et sur GitHub, sous Linux, avec rebases fréquents ;
+c) script de CI qui doit tagger une version automatiquement.
+
+---
+
+## 🔑 Corrigés
+
+### Corrigé 8.1
+a) `git switch dev` · b) `git add -p` (pour ce bloc) · c) `git reset --mixed <hash>` · d) `git cherry-pick <hash>` · e) `git pull --rebase` · f) `git stash`.
+
+### Corrigé 8.2
+Clic droit sur le commit **parent** du premier `wip` (le dernier commit avant ta branche) → **Interactive Rebase** :
+- `wip` → **Pick** ; `wip 2`, `feat: ajoute l'export CSV`, `typo` → **Squash** (fusionnés dans le précédent) ;
+- **Reword** du commit résultant (ou édite le message proposé) → `feat: ajoute l'export CSV` ;
+- **Start Rebase**.
+
+Équivalent : `git rebase -i HEAD~4` (ou `git rebase -i main`), puis `pick`/`squash` dans l'éditeur. Si la branche était déjà poussée : `git push --force-with-lease` (branche perso uniquement). Alternative sans réécriture locale : **Squash and merge** au moment du merge de la PR.
+
+### Corrigé 8.3
+| Mode | Modifications du commit annulé |
+|---|---|
+| **Soft** | Dans le **staging** (prêtes à être recommitées) |
+| **Mixed** | Dans le **répertoire de travail**, non stagées |
+| **Hard** | **Supprimées** (récupérables seulement via le reflog) |
+
+### Corrigé 8.4
+GitKraken : bouton **Undo** juste après la suppression.
+Ligne de commande : une branche non fusionnée ne se supprime qu'avec `git branch -D` (avec `-d`, Git refuse : *not fully merged*), et Git affiche alors `Deleted branch feature/api (was a1b2c3d).` Note ce hash ; sinon le reflog permet de le retrouver :
+```bash
+git reflog                          # chercher le dernier commit de feature/api
+git branch feature/api a1b2c3d      # recrée la branche sur ce commit
+```
+
+### Corrigé 8.5
+a) Dans `main` mais pas `feature` : **F**. Dans `feature` mais pas `main` : **D et E**. (B et C sont communs.)
+b)
+```bash
+git log --oneline feature..main     # → F
+git log --oneline main..feature     # → E, D
+```
+`A..B` = « les commits accessibles depuis B mais pas depuis A ».
+
+### Corrigé 8.6
+a) **GitHub Desktop** (simple, intégré à GitHub, Windows).
+b) **GitKraken** (Linux, multi-plateformes GitHub + GitLab, rebase interactif visuel) — ou la CLI.
+c) **CLI** : une CI n'a pas d'interface graphique (`git tag -a v1.2.0 -m "..." && git push origin v1.2.0`).
+
 ➡️ Suite : [Chapitre 9 — TP final](09-tp-final.md)

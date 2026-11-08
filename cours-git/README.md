@@ -1,6 +1,6 @@
 # 🎓 Cours complet : Git, GitHub, GitLab et leurs outils
 
-Cours en français, orienté **data science / data analytics / développement**, avec explications, exemples exécutables et un TP final.
+Cours en français, orienté **data science / data analytics / développement**, avec explications, exemples exécutables, **exercices corrigés à la fin de chaque chapitre** (54 au total) et un TP final.
 
 > 📄 **Version PDF :** [`cours-git.pdf`](cours-git.pdf) (A4, avec sommaire cliquable, signets, et les fichiers d'exemple en pièce jointe `exemples-cours-git.zip`). Pour la régénérer en local après modification des chapitres :
 > ```bash
@@ -49,6 +49,8 @@ Cours en français, orienté **data science / data analytics / développement**,
 7. [GitLab CI/CD — pipelines](07-gitlab-ci-cd.md)
 8. [GitKraken — client graphique avancé](08-gitkraken.md)
 9. [TP final — un projet data de A à Z](09-tp-final.md)
+
+**Exercices :** chaque chapitre se termine par une section *📝 Exercices* puis une section *🔑 Corrigés* (sur une nouvelle page dans la version PDF). Fais les exercices avant de regarder les corrigés ; ceux qui portent sur Git, Bash et les fichiers YAML ont été vérifiés en les exécutant.
 
 **Ordre conseillé :** 1 → 2 → 3 → 4 → 5, puis 6 → 7, puis 8 et 9. Si tu travailles uniquement avec GitLab, tu peux faire 1 → 2 → 6 → 7 → 8 → 9.
 

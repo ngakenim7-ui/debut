@@ -91,4 +91,52 @@ Lors d'un merge en conflit, Desktop liste les fichiers concernés et propose **O
 | Discard changes | `git restore <fichier>` ⚠️ |
 | Repository → Open in Command Prompt / Git Bash | ouvre un terminal dans le dépôt |
 
+---
+
+## 📝 Exercices
+
+### Exercice 4.1 — Boutons ↔ commandes
+Donne la commande Git équivalente : a) *Fetch origin* · b) *Push origin* · c) *Undo* (sur le dernier commit) · d) *Discard changes* sur un fichier · e) *Revert changes in commit* · f) cocher/décocher un fichier dans *Changes*.
+
+### Exercice 4.2 — Commit partiel
+Tu as modifié 30 lignes de `nettoyage.py`, mais seules 10 concernent le bug que tu corriges. Comment ne commiter que ces 10 lignes avec GitHub Desktop ?
+
+### Exercice 4.3 — Oups, j'ai codé sur `main`
+Tu as des modifications non commitées sur `main` et tu réalises qu'elles devraient être sur une nouvelle branche `feature/graphiques`. Que fais-tu dans GitHub Desktop ?
+
+### Exercice 4.4 — Undo ou Revert ?
+a) Tu viens de commiter, tu n'as pas poussé, et tu as oublié un fichier.
+b) Le commit a été poussé hier et tes collègues l'ont récupéré ; il faut l'annuler.
+
+### Exercice 4.5 — Lire le bouton
+Le bouton du haut affiche **Pull origin** avec `↓ 2` et `↑ 1`. Qu'est-ce que ça signifie ? Que se passe-t-il quand tu cliques ?
+
+### Exercice 4.6 — Conflit
+Remets dans l'ordre la résolution d'un conflit dans GitHub Desktop :
+(a) *Continue merge* · (b) *Branch → Merge into current branch…* · (c) supprimer les marqueurs et choisir le bon code dans l'éditeur · (d) *Open in Visual Studio Code* sur le fichier en conflit · (e) *Push origin*
+
+---
+
+## 🔑 Corrigés
+
+### Corrigé 4.1
+a) `git fetch` · b) `git push` · c) `git reset --soft HEAD~1` · d) `git restore <fichier>` (⚠️ irréversible) · e) `git revert <hash>` · f) `git add <fichier>` / `git restore --staged <fichier>`.
+
+### Corrigé 4.2
+Dans l'onglet *Changes*, clique sur `nettoyage.py` : le diff s'affiche. **Clique sur les numéros de ligne** (ou les blocs) que tu ne veux **pas** inclure pour les désélectionner. Seules les lignes sélectionnées iront dans le commit ; les autres restent en modifications locales. Équivalent : `git add -p`.
+
+### Corrigé 4.3
+*Current branch → New branch* → `feature/graphiques` → *Create branch*. Desktop demande quoi faire des modifications : choisir de les **emporter sur la nouvelle branche** (*Bring my changes to feature/graphiques*). Puis commit sur cette branche. `main` reste propre.
+Équivalent : `git switch -c feature/graphiques` (les modifs non commitées suivent automatiquement).
+
+### Corrigé 4.4
+a) **Undo** (ou *Amend commit*) : le dernier commit n'est pas poussé, on peut le refaire.
+b) **Revert changes in commit** : crée un commit inverse sans réécrire l'historique partagé.
+
+### Corrigé 4.5
+Ta branche locale a **2 commits de retard** (présents sur GitHub, pas chez toi) et **1 commit d'avance** (chez toi, pas sur GitHub) : les historiques ont divergé. Cliquer sur *Pull origin* récupère et intègre les 2 commits (un merge par défaut, ou un rebase si ta config Git `pull.rebase` le demande — un conflit est possible). Ensuite le bouton devient *Push origin ↑* pour envoyer ton commit (ou les 2 si un commit de merge a été créé).
+
+### Corrigé 4.6
+**b → d → c → a → e**.
+
 ➡️ Suite : [Chapitre 5 — GitHub Actions](05-github-actions.md)

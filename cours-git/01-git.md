@@ -372,4 +372,142 @@ Git n'est pas fait pour les gros fichiers binaires (datasets, modèles). GitHub 
 4. Déjà poussé ? → `git revert`, pas `git reset`.
 5. Jamais de secrets ni de gros datasets dans Git.
 
+---
+
+## 📝 Exercices
+
+### Exercice 1.1 — Les 3 zones
+Tu exécutes, dans un dépôt propre :
+
+```bash
+echo "v1" > a.py
+git add a.py
+echo "v2" > a.py
+git status
+```
+
+a) Dans quelle(s) rubrique(s) `git status` affiche-t-il `a.py` ?
+b) Si tu fais maintenant `git commit -m "ajout"`, quel contenu de `a.py` est enregistré : `v1` ou `v2` ?
+
+### Exercice 1.2 — Premier historique
+Écris la suite de commandes qui : crée un dossier `exo-git`, l'initialise avec la branche `main`, crée un `README.md` puis un `analyse.py`, et produit **deux commits séparés** (un par fichier). Termine par la commande qui affiche l'historique sur une ligne par commit.
+
+### Exercice 1.3 — Quelle commande ?
+Pour chaque situation, donne **la** commande adaptée.
+
+| # | Situation |
+|---|---|
+| a | Tu as cassé `nettoyage.py` (non stagé) et veux revenir à la version du dernier commit |
+| b | Tu as fait `git add data.csv` par erreur, mais tu veux garder le fichier sur le disque et ne pas le commiter |
+| c | Ton dernier commit (pas encore poussé) a une faute dans le message |
+| d | Un commit poussé il y a 3 jours sur `main` a introduit un bug ; tes collègues ont déjà récupéré `main` |
+| e | Tu veux défaire ton dernier commit local mais garder les modifications stagées pour les recommiter autrement |
+
+### Exercice 1.4 — Secret commité 🔐
+Tu viens de faire un commit (**pas encore poussé**) qui contient, en plus de ton code, le fichier `.env` avec un mot de passe. Donne les commandes pour retirer `.env` de ce commit, l'ignorer à l'avenir, et garder le fichier sur ton disque. Que faudrait-il faire en plus si le commit avait **déjà été poussé** ?
+
+### Exercice 1.5 — Fast-forward ou commit de merge ?
+Pour chaque cas, `git switch main && git merge feature` produit-il un fast-forward ou un commit de merge ?
+
+```
+Cas A :  main: A───B───C                Cas B :  main: A───B───C───F
+                        \                                   \
+               feature:  D───E                     feature:  D───E
+```
+
+### Exercice 1.6 — Conflit pendant un rebase
+Sur `main`, la ligne `seuil = 0.5` de `config.py` a été changée en `seuil = 0.7`. Sur ta branche `feature/modele`, tu l'as changée en `seuil = 0.6`. Tu lances `git rebase main` depuis ta branche → conflit. Tu décides de garder `0.7`. Quelles commandes tapes-tu pour terminer le rebase ? Et pour tout annuler ?
+
+### Exercice 1.7 — Sauvetage
+Tu as tapé `git reset --hard HEAD~2` et perdu deux commits importants. Comment les récupérer ?
+
+### Exercice 1.8 — `.gitignore` piégé
+Avec ce `.gitignore` :
+
+```gitignore
+*.csv
+!data/sample/*.csv
+data/raw/
+!data/raw/LISEZMOI.md
+```
+
+Quels fichiers sont **ignorés** ? `ventes.csv`, `data/sample/extrait.csv`, `data/raw/clients.parquet`, `data/raw/LISEZMOI.md`.
+
+---
+
+## 🔑 Corrigés
+
+### Corrigé 1.1
+a) **Dans les deux** : sous *Changes to be committed* (la version `v1` mise dans le staging) **et** sous *Changes not staged for commit* (la modification `v2` faite après le `add`).
+b) **`v1`** : `git commit` enregistre le contenu du staging, pas celui du disque. Pour enregistrer `v2`, il faut refaire `git add a.py` (ou `git commit -a`).
+
+### Corrigé 1.2
+```bash
+mkdir exo-git && cd exo-git
+git init -b main
+echo "# Exo Git" > README.md
+git add README.md
+git commit -m "docs: ajoute le README"
+echo 'print("analyse")' > analyse.py
+git add analyse.py
+git commit -m "feat: ajoute le script d'analyse"
+git log --oneline
+```
+
+### Corrigé 1.3
+| # | Commande | Pourquoi |
+|---|---|---|
+| a | `git restore nettoyage.py` | Remet la version du dernier commit (⚠️ modifs perdues) |
+| b | `git restore --staged data.csv` | Retire du staging, le fichier reste intact (et ajoute `*.csv` au `.gitignore`) |
+| c | `git commit --amend -m "Nouveau message"` | Réécrit le dernier commit — OK car non poussé |
+| d | `git revert <hash>` | Crée un commit inverse **sans réécrire** l'historique partagé |
+| e | `git reset --soft HEAD~1` | Le commit disparaît, les modifs restent stagées |
+
+### Corrigé 1.4
+```bash
+git rm --cached .env                 # retire .env du suivi, sans le supprimer du disque
+echo ".env" >> .gitignore
+git add .gitignore
+git commit --amend --no-edit         # remplace le commit fautif par une version sans .env
+git log --stat -1                    # vérifier : .env n'apparaît plus
+```
+Si le commit **avait été poussé** : le mot de passe doit être considéré comme **compromis** → le **changer immédiatement**. Nettoyer l'historique distant (outil `git filter-repo`, puis force-push coordonné avec l'équipe) est possible mais ne suffit pas : des copies (clones, forks, caches) peuvent déjà exister.
+
+### Corrigé 1.5
+- **Cas A : fast-forward.** `main` (C) est un ancêtre direct de `feature` (E) : Git avance simplement `main` jusqu'à E, aucun nouveau commit.
+- **Cas B : commit de merge.** Les deux branches ont divergé depuis B (F d'un côté, D-E de l'autre) : Git crée un commit avec **deux parents** (F et E).
+
+### Corrigé 1.6
+```bash
+# Ouvrir config.py, garder "seuil = 0.7", supprimer les marqueurs <<<<<<< ======= >>>>>>>
+git add config.py
+git rebase --continue     # Git peut ouvrir l'éditeur pour confirmer le message : enregistrer et fermer
+```
+Pour tout annuler et revenir à l'état d'avant le rebase : `git rebase --abort`.
+
+> Remarque : pendant un rebase, `HEAD` (« ours ») désigne la branche **sur laquelle** tu rejoues (`main`), et « theirs » tes propres commits — l'inverse d'un merge. C'est une source classique de confusion.
+
+### Corrigé 1.7
+```bash
+git reflog                     # repérer la ligne juste AVANT le "reset: moving to HEAD~2"
+# ex. : a1b2c3d HEAD@{1}: commit: mon commit important
+git reset --hard a1b2c3d       # ou : git reset --hard HEAD@{1}
+```
+Alternative plus prudente : `git branch sauvetage a1b2c3d` (crée une branche sur le commit perdu sans toucher à la branche actuelle).
+
+### Corrigé 1.8
+| Fichier | Ignoré ? | Raison |
+|---|---|---|
+| `ventes.csv` | ✅ oui | règle `*.csv` |
+| `data/sample/extrait.csv` | ❌ non | ré-inclus par `!data/sample/*.csv` |
+| `data/raw/clients.parquet` | ✅ oui | tout le dossier `data/raw/` est ignoré |
+| `data/raw/LISEZMOI.md` | ✅ **oui** (piège !) | Git ne peut pas ré-inclure un fichier dont le **dossier parent** est exclu |
+
+Pour garder `LISEZMOI.md`, il faut ignorer le **contenu** du dossier et non le dossier lui-même :
+```gitignore
+data/raw/*
+!data/raw/LISEZMOI.md
+```
+Vérification : `git check-ignore -v data/raw/LISEZMOI.md` affiche la règle responsable (aucune sortie = non ignoré).
+
 ➡️ Suite : [Chapitre 2 — Git Bash](02-git-bash.md)
