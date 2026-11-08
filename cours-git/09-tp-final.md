@@ -2,7 +2,7 @@
 
 Objectif : utiliser **tous** les outils du cours sur un mini-projet d'analyse. Compte environ 2 heures.
 
-Prérequis : Git installé, un compte GitHub **et** un compte GitLab, une clé SSH ajoutée aux deux.
+Prérequis : Git installé, un compte GitHub **et** un compte GitLab, une clé SSH ajoutée aux deux, et les fichiers d'exemple (dossier `cours-git/exemples/` du dépôt, ou annexe / pièce jointe `exemples-cours-git.zip` de la version PDF). Dans les commandes, remplace `<chemin-vers>/cours-git/exemples` par le dossier où tu as placé ces fichiers.
 
 ---
 

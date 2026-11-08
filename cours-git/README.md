@@ -2,6 +2,13 @@
 
 Cours en français, orienté **data science / data analytics / développement**, avec explications, exemples exécutables et un TP final.
 
+> 📄 **Version PDF :** [`cours-git.pdf`](cours-git.pdf) (A4, avec sommaire cliquable, signets, et les fichiers d'exemple en pièce jointe `exemples-cours-git.zip`). Pour la régénérer en local après modification des chapitres :
+> ```bash
+> pip install markdown pygments pypdf playwright
+> playwright install chromium
+> python cours-git/outils/generer_pdf.py
+> ```
+
 ## Comment s'articulent ces outils ?
 
 ```
