@@ -1,0 +1,13 @@
+# Versions avec lesquelles l'ebook a été vérifié (des versions proches conviennent)
+pandas>=2.2
+numpy>=2.0
+scipy>=1.13
+statsmodels>=0.14
+scikit-learn>=1.6
+matplotlib>=3.8
+# Chapitre 7 uniquement
+torch>=2.3
+tensorflow>=2.16
+# Construction du PDF (optionnel)
+markdown>=3.6
+weasyprint>=62

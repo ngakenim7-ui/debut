@@ -1,0 +1,31 @@
+
+======================================================================
+7.1 Préparation
+======================================================================
+X_train : (3750, 8) | y_train : (3750, 1)
+
+======================================================================
+7.2 Entraînement correct
+======================================================================
+AUC test = 0.8248
+
+======================================================================
+7.3 Bug : oubli de zero_grad
+======================================================================
+appel 1 : grad = -2.1996  (les gradients s'additionnent)
+appel 2 : grad = -4.3992  (les gradients s'additionnent)
+appel 3 : grad = -6.5988  (les gradients s'additionnent)
+AUC test sans zero_grad = 0.6256
+
+======================================================================
+7.4 Bug : double sigmoïde
+======================================================================
+AUC test = 0.7920 | proba prédites (sigmoïde du logit) : min=0.000 max=0.798
+-> le classement peut rester correct, mais les probabilités sont faussées (non calibrées).
+   proba moyenne prédite : correcte=0.171  bug=0.025  | vrai taux=0.162
+
+======================================================================
+7.5 Bug : oubli de model.eval()
+======================================================================
+deux prédictions du même modèle en mode train : AUC 0.8152 puis 0.8169 ; écart max des proba = 0.508
+en mode eval : AUC 0.8248 puis 0.8248 ; écart max = 0.000

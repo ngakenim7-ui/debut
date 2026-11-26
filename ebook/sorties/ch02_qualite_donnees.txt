@@ -1,0 +1,72 @@
+
+======================================================================
+2.1 Premier contact
+======================================================================
+shape : (2015, 7)
+client_id                     int64
+date_inscription     datetime64[us]
+region                          str
+age                         float64
+revenu_annuel               float64
+segment                         str
+canal_acquisition               str
+dtype: object
+
+Valeurs manquantes par colonne :
+ age               60
+revenu_annuel    100
+dtype: int64
+
+======================================================================
+2.2 Doublons
+======================================================================
+doublons exacts : 15 | client_id répétés : 15
+après dédoublonnage : (2000, 7)
+
+======================================================================
+2.3 Catégories incohérentes
+======================================================================
+avant : [' Centre ', ' Est ', ' Nord ', ' Ouest ', ' Sud ', 'Centre', 'Est', 'Nord', 'Ouest', 'Sud', 'centre', 'est', 'nord', 'ouest', 'sud']
+après : ['Centre', 'Est', 'Nord', 'Ouest', 'Sud']
+
+======================================================================
+2.4 Valeurs aberrantes sur l'âge
+======================================================================
+count    1940.00
+mean       42.21
+std        33.21
+min        -1.00
+25%        33.00
+50%        41.00
+75%        49.00
+max       999.00
+Name: age, dtype: float64
+valeurs aberrantes : [-1.0, 0.0, 150.0, 200.0, 999.0, 999.0]
+moyenne brute = 42.21 | moyenne après correction = 41.12
+âges manquants après correction : 66
+
+======================================================================
+2.5 Jointures
+======================================================================
+transactions : (20000, 7)
+transactions orphelines (client inconnu) : 150
+_merge
+both          19850
+left_only       150
+right_only        0
+Name: count, dtype: int64
+avec les doublons : 20197 lignes au lieu de 20000 (+197)
+validate= a détecté le problème : MergeError
+
+======================================================================
+2.6 CA validé par région (2024)
+======================================================================
+        count        sum
+region                  
+Centre   1244  187985.10
+Est      1453  216439.97
+Nord     2485  369278.70
+Ouest    2101  323106.27
+Sud      1533  240440.09
+NaN        65    8401.45
+Note : la ligne NaN = CA des transactions orphelines, à signaler et non à supprimer en silence.

@@ -1,0 +1,57 @@
+
+======================================================================
+Cas 1 — ddof
+======================================================================
+np.std(x) = 2.2361 | pd.Series(x).std() = 2.582
+Verdict : FAUX. NumPy utilise ddof=0 par défaut, Pandas ddof=1.
+
+======================================================================
+Cas 2 — moyenne de taux
+======================================================================
+taux par appareil (B) : {'desktop': 0.1533, 'mobile': 0.0504}
+moyenne simple des taux  = 0.1019
+vrai taux global de B    = 0.0762
+Verdict : FAUX. Il faut pondérer par les effectifs (3 000 desktop / 9 000 mobile).
+
+======================================================================
+Cas 3 — jointure non contrôlée
+======================================================================
+CA selon le script LLM            : 3,061,128.34
+CA réel (toutes transactions)     : 3,051,497.82
+CA réel (clients connus seulement): 3,029,796.60
+écart vs clients connus : +31,331.74 (doublons) ; transactions orphelines perdues : 21,701.22
+Verdict : deux erreurs qui se compensent partiellement -> un total « plausible » mais faux.
+
+======================================================================
+Cas 4 — accuracy vs baseline
+======================================================================
+part de non-churners = 0.8386
+Verdict : 84 % = score d'un modèle constant. Il faut AUC, précision/rappel, PR AUC.
+
+======================================================================
+Cas 5 — AVG et NULL
+======================================================================
+ avg_sql  si_null_egal_zero  moyenne_non_null
+35756.82           33982.29          35756.82
+Verdict : FAUX. AVG ignore les NULL (= SUM / COUNT(col)).
+
+======================================================================
+Cas 6 — API obsolètes
+======================================================================
+pandas 3.0.5 | scikit-learn 1.9.1
+DataFrame.append existe ? False (supprimée en pandas 2.0 -> pd.concat)
+mean_squared_error(squared=False) -> TypeError : got an unexpected keyword argument 'squared'
+root_mean_squared_error([1,2],[1,4]) = 1.4142
+
+======================================================================
+Cas 7 — variance d'une somme
+======================================================================
+Var(X+Y)=2341.19 | Var(X)+Var(Y)=1352.25 | + 2Cov(X,Y)=2341.19
+Verdict : FAUX sauf si X et Y sont non corrélées. Formule : Var(X+Y)=Var(X)+Var(Y)+2Cov(X,Y).
+
+======================================================================
+Cas 8 — imputation avant split
+======================================================================
+médiane sur TOUT le jeu = 3.0 | moyenne sur tout le jeu = 3.0013
+moyenne sur le train seul = 3.0084
+Verdict : fuite légère (l'info du test entre dans le train). Impact faible ici, mais la méthode est fausse.

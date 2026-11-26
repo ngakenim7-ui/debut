@@ -1,0 +1,13 @@
+
+======================================================================
+7.6 Keras : configuration cohérente
+======================================================================
+AUC test = 0.8281 | proba moyenne = 0.160 (vrai taux 0.162)
+
+======================================================================
+7.7 Keras : sigmoid + from_logits=True (incohérent)
+======================================================================
+AUC test = 0.8281 | proba moyenne = 0.160 (vrai taux 0.162)
+Constat vérifié : Keras détecte la sigmoïde, émet un UserWarning et corrige en interne.
+=> Une affirmation du type « ce code donne des probabilités fausses » serait FAUSSE ici,
+   alors qu'elle est VRAIE pour l'équivalent PyTorch (section 7.4). Toujours exécuter avant de conclure.

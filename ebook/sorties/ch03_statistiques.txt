@@ -1,0 +1,62 @@
+
+======================================================================
+3.1 Écart-type : ddof
+======================================================================
+np.std(x)          = 2.0  (ddof=0, population)
+np.std(x, ddof=1)  = 2.1381  (ddof=1, échantillon)
+pd.Series(x).std() = 2.1381  (Pandas : ddof=1 par défaut)
+
+======================================================================
+3.2 IC à 95 % du revenu moyen
+======================================================================
+n=1900  moyenne=35778  écart-type=17121  IC95%=[35008 ; 36549]
+médiane=32395  asymétrie (skew)=1.49  -> distribution asymétrique à droite
+IC95% bootstrap de la médiane = [31569 ; 33255]
+
+======================================================================
+3.3 Test A/B : vue globale
+======================================================================
+         sum  count    mean
+groupe                     
+A       1209  12000  0.1008
+B        914  12000  0.0762
+z = 6.706  p = 2.00e-11  -> conclusion naïve : A est meilleur que B
+
+======================================================================
+3.3 bis Test A/B : par appareil
+======================================================================
+groupe         A       B
+appareil                
+desktop   0.1213  0.1533
+mobile    0.0390  0.0504
+
+Effectifs :
+ groupe       A     B
+appareil            
+desktop   9000  3000
+mobile    3000  9000
+desktop  z=-4.523  p=6.09e-06
+mobile   z=-2.550  p=1.08e-02
+
+OR commun (B vs A, Mantel-Haenszel) = 1.311  p = 2.16e-07
+IC95% Wilson groupe A : [0.0955 ; 0.1063]
+IC95% Wilson groupe B : [0.0716 ; 0.0810]
+
+======================================================================
+3.4 Tests multiples sous H0
+======================================================================
+100 tests où H0 est VRAIE -> p < 0.05 : 7
+après Bonferroni : 0
+après Benjamini-Hochberg : 0
+P(au moins un faux positif sur 20 tests) = 1 - 0.95**20 = 0.6415
+
+======================================================================
+3.5 Corrélation et valeurs extrêmes
+======================================================================
+sans point extrême : Pearson=-0.160  Spearman=-0.072
+avec 1 point (10,10): Pearson=0.784  Spearman=0.028
+
+======================================================================
+3.6 Taille d'échantillon pour détecter 10 % -> 11 %
+======================================================================
+h de Cohen = 0.0326  -> n ≈ 14745 par groupe
