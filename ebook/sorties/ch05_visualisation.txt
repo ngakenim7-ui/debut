@@ -1,0 +1,56 @@
+
+======================================================================
+5.1 Axe tronqué
+======================================================================
+groupe
+A    0.1008
+B    0.0762
+Name: converti, dtype: float64
+figure -> /home/claude/debut/ebook/sorties/figures/fig5_1_axe_tronque.png
+
+======================================================================
+5.2 Simpson en image
+======================================================================
+groupe         A       B
+appareil                
+desktop   0.1213  0.1533
+mobile    0.0390  0.0504
+figure -> /home/claude/debut/ebook/sorties/figures/fig5_2_simpson.png
+
+======================================================================
+5.3 Ventes mensuelles
+======================================================================
+shape pivot : (36, 5)
+figure -> /home/claude/debut/ebook/sorties/figures/fig5_3_ventes.png
+ratio décembre / autres mois :
+ categorie
+Alimentation    1.077
+Electronique    1.544
+Loisirs         1.372
+Maison          1.118
+Mode            1.238
+Name: chiffre_affaires, dtype: float64
+
+======================================================================
+5.4 Distribution du revenu
+======================================================================
+figure -> /home/claude/debut/ebook/sorties/figures/fig5_4_revenu.png
+
+======================================================================
+5.5 Anscombe
+======================================================================
+I   moy_x=9.00 moy_y=7.50 var_y=4.13 r=0.816 droite y=3.00+0.500x
+II  moy_x=9.00 moy_y=7.50 var_y=4.13 r=0.816 droite y=3.00+0.500x
+III moy_x=9.00 moy_y=7.50 var_y=4.12 r=0.816 droite y=3.00+0.500x
+IV  moy_x=9.00 moy_y=7.50 var_y=4.12 r=0.817 droite y=3.00+0.500x
+figure -> /home/claude/debut/ebook/sorties/figures/fig5_5_anscombe.png
+
+======================================================================
+5.6 Churn par contrat
+======================================================================
+                mean  count      se
+type_contrat                       
+Mensuel       0.2237   2740  0.0080
+Annuel        0.1015   1487  0.0078
+Biennal       0.0556    773  0.0082
+figure -> /home/claude/debut/ebook/sorties/figures/fig5_6_churn_contrat.png

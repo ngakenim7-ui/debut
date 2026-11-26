@@ -1,0 +1,89 @@
+
+======================================================================
+6.1 Données churn
+======================================================================
+shape : (5000, 10) | taux de churn : 0.1614
+manquants : {'satisfaction': 400}
+train : (3750, 8) test : (1250, 8)
+taux de churn train=0.1613 test=0.1616 (stratification OK)
+
+======================================================================
+6.2 Baseline
+======================================================================
+accuracy d'un modèle qui prédit toujours 0 : 0.8384
+
+======================================================================
+6.3 Fuite de données
+======================================================================
+AUC AVEC appels_service_resiliation : 0.9996  <- trop beau pour être vrai
+AUC SANS la variable fuyante         : 0.8314
+
+======================================================================
+6.4 Fuite par sélection de variables
+======================================================================
+données = bruit pur. Accuracy CV avec fuite : 0.825 | sans fuite : 0.595
+
+======================================================================
+6.5 Métriques
+======================================================================
+matrice de confusion (seuil 0.5) [lignes = réel 0/1, colonnes = prédit 0/1] :
+[[1020   28]
+ [ 147   55]]
+              precision    recall  f1-score   support
+
+           0      0.874     0.973     0.921      1048
+           1      0.663     0.272     0.386       202
+
+    accuracy                          0.860      1250
+   macro avg      0.768     0.623     0.653      1250
+weighted avg      0.840     0.860     0.835      1250
+
+ROC AUC = 0.8314 | PR AUC (average precision) = 0.5138 (référence aléatoire = prévalence = 0.1616)
+
+======================================================================
+6.5 bis Choix du seuil
+======================================================================
+seuil 0.2 : précision=0.397 rappel=0.708 nb_ciblés=360
+seuil 0.3 : précision=0.486 rappel=0.525 nb_ciblés=218
+seuil 0.4 : précision=0.562 rappel=0.381 nb_ciblés=137
+seuil 0.5 : précision=0.663 rappel=0.272 nb_ciblés=83
+
+======================================================================
+6.6 Validation croisée (sur le train uniquement)
+======================================================================
+Régression logistique  AUC = 0.8099 ± 0.0241
+Forêt aléatoire        AUC = 0.7867 ± 0.0231
+
+======================================================================
+6.6 bis Coefficients (variables standardisées)
+======================================================================
+num__anciennete_mois        -0.765
+cat__type_contrat_Biennal   -0.649
+num__satisfaction           -0.630
+bin__abonnement_premium     -0.616
+num__nb_transactions_90j    -0.406
+num__montant_moyen           0.115
+num__nb_reclamations         0.475
+cat__type_contrat_Mensuel    1.096
+dtype: float64
+
+======================================================================
+6.7 Régression et colinéarité
+======================================================================
+shape : (1500, 7) | corr(surface, nb_pieces) = 0.912
+VIF :
+ surface_m2            5.95
+nb_pieces             5.95
+annee_construction    1.00
+distance_centre_km    1.00
+dtype: float64
+R² test = 0.8760 | MAE = 29,504 € | RMSE = 42,334 €
+baseline (prédire la moyenne du train) : MAE = 91,570 €
+surface_m2                2778.6
+nb_pieces                  380.3
+annee_construction         429.5
+distance_centre_km       -2839.6
+quartier_Industriel    -140489.4
+quartier_Peripherie    -102346.2
+quartier_Residentiel    -57429.3
+dtype: float64
